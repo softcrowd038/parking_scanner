@@ -5,14 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import 'package:gaushala_scanner1/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/Login/session_manager.dart';
-
 class ScannerPage extends StatefulWidget {
-  const ScannerPage({Key? key}) : super(key: key);
+  const ScannerPage({super.key});
 
   @override
   State<ScannerPage> createState() => _ScannerPageState();
@@ -138,18 +134,6 @@ class _ScannerPageState extends State<ScannerPage> {
       }
     } catch (e) {
       _showErrorDialog('Error during $action: $e');
-    }
-  }
-
-  Future<void> _logout() async {
-    try {
-      context.read<SessionManager>().clearSession(context);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } catch (e) {
-      print('Error during logout: $e');
     }
   }
 
