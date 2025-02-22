@@ -18,15 +18,13 @@ class _ScannerPageState extends State<ScannerPage> {
   String qrResult = "";
   bool isClicked = false;
   double turns = 0.0;
-  String checkInOutStatus = "check_out"; // Default status
-  String uniqueID = "Rutik@123";
+  String checkInOutStatus = "check_out";
   int scanCounter = -1;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _initializeStatus();
   }
 
   @override
@@ -36,13 +34,6 @@ class _ScannerPageState extends State<ScannerPage> {
       DeviceOrientation.portraitDown,
     ]);
     super.dispose();
-  }
-
-  Future<void> _initializeStatus() async {
-    String status = await getCheckInStatus();
-    setState(() {
-      checkInOutStatus = status;
-    });
   }
 
   Future<void> scanQRCode() async {
@@ -57,7 +48,7 @@ class _ScannerPageState extends State<ScannerPage> {
       if (qrCode == '-1') {
         print("QR scan canceled");
       } else {
-        if (qrCode == uniqueID || qrCode.isNotEmpty) {
+        if (qrCode.isNotEmpty) {
           print("Valid QR Code: $qrCode");
           _processScanResult(qrCode);
         } else {
@@ -99,38 +90,34 @@ class _ScannerPageState extends State<ScannerPage> {
     });
   }
 
-  Future<String> getCheckInStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('checkInStatus') ?? 'check_out';
-  }
-
   Future<void> _processScanResult(String url) async {
     String apiUrl =
-        'https://exilance.com/gaushala_management_system/login_api/check_in_out_api.php';
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final visitorId = prefs.getString('visitorId');
-    final password = prefs.getString('password');
+        'https://exilance.com/parking-management/public/api/verify-qr';
+
     final action = checkInOutStatus == 'check_in' ? 'check_out' : 'check_in';
 
     try {
       Map<String, dynamic> requestData = {
-        'qrCode': url,
-        'action': action,
-        'visitor_id': visitorId,
-        'password': password,
+        'qr_code': url,
       };
 
       final response = await http.post(
         Uri.parse(apiUrl),
         body: json.encode(requestData),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json', // Added to force server to send JSON
+        },
       );
 
       if (response.statusCode == 200) {
         await setCheckInStatus(action);
+
         _showSuccessDialog('$action successful!');
       } else {
-        _showErrorDialog('Failed to $action');
+        print('Error Response: ${response.body}');
+        Map<String, dynamic> jsonData = json.decode(response.body);
+        _showErrorDialog('${jsonData["message"]}');
       }
     } catch (e) {
       _showErrorDialog('Error during $action: $e');

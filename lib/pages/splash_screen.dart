@@ -23,16 +23,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigationWidget() async {
-    // final sessionManager = Provider.of<SessionManager>(context, listen: false);
-    // String? authToken = sessionManager.authToken;
-
-    // if (authToken != null) {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const ScannerPage()));
-    // } else {
-    //   Navigator.pushReplacement(
-    //       context, MaterialPageRoute(builder: (context) => const LoginPage()));
-    // }
   }
 
   @override
